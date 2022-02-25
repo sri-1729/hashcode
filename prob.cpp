@@ -30,14 +30,18 @@ set<int> cntbrs_assigned;
 //     return ans;
 // }
 
+bool canUpskill = false;
 bool canBeGiven(int cntbr, string role, int level){
     int aukat = crs[cntbr].cr_details[role];
+    if(aukat == level)
+        canUpskill = true;
     if(aukat >= level)
         return true;
     if(aukat + 1 != level)
         return false;
     for(auto i: cntbrs_assigned){
-        if(crs[i].cr_details[role] > level){
+        if(crs[i].cr_details[role] >= level){
+            canUpskill = true;
             return true;
         }
     }
@@ -61,9 +65,13 @@ int giveContrubutor(string role, int level){
 }
 
 bool mycmp(struct projects &a, struct projects &b){
-    return a.best_before < b.best_before;
+    if(rand() & 1)
+        return true;
+    return false;
+    
 }
 int main(){
+    srand(time(NULL));
     ios_base::sync_with_stdio(0);
 	cin.tie(0);
 	cout.tie(0);
@@ -101,9 +109,12 @@ int main(){
     vector<pair<int, vector<int>>> ans(prjts);
     int tot = 0;
     int skills_covered = 0;
+    vector<int> whoCanUpgrade;
+    vector<string> whatTheyCanUpgrade;
     for(int i = 0; i < prjts; i++){
         skills_covered = 0;
         for(auto j: pro[i].skl_req){
+            canUpskill = false;
             int c = giveContrubutor(j.first, j.second);
             if(c != -1){
                 //cout << i << " "<< j.first << " " << c << "\n";
@@ -111,17 +122,27 @@ int main(){
                 ans[tot].first = i;
                 ans[tot].second.push_back(c);
                 skills_covered++;
+                if(canUpskill == true){
+                    whoCanUpgrade.push_back(c);
+                    whatTheyCanUpgrade.push_back(j.first);
+                   // canUpskill = false;
+                }
                 //cout << c << "* ";
             }
         }
         if(skills_covered == pro[i].total_roles){
             tot++;
+            for(int i = 0; i < whoCanUpgrade.size(); i++){
+                crs[whoCanUpgrade[i]].cr_details[whatTheyCanUpgrade[i]]++;
+            }
 
         }
         else{
             ans[tot].second.clear();
         }
         cntbrs_assigned.clear();
+        whoCanUpgrade.clear();
+        whatTheyCanUpgrade.clear();
     }
     cout << tot << "\n";
     for(int i = 0; i < tot; i++){
