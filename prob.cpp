@@ -22,16 +22,13 @@ struct projects pro[100000];
 
 set<int> cntbrs_assigned;
 
-vector<int> find_mentors(int mentee, int level, string skill){
-    vector<int> ans;
-    for(int i = 0; i < cntbrs; i++){
-        if(crs[i].cr_details.find(skill) != crs[i].cr_details.end()){
-            if(crs[i].cr_details[skill] >= level)
-                ans.push_back(i);
-        }
-    }
-    return ans;
-}
+// vector<int> find_mentors(int mentee, int level, string skill){
+//     vector<int> ans;
+//     for(auto i: cntbrs_assigned){
+//         crs[i].cr_details[skill].
+//     }
+//     return ans;
+// }
 
 bool canBeGiven(int cntbr, string role, int level){
     int aukat = crs[cntbr].cr_details[role];
@@ -39,11 +36,18 @@ bool canBeGiven(int cntbr, string role, int level){
         return true;
     if(aukat + 1 != level)
         return false;
-    vector<int> mentors = find_mentors(cntbr, level, role);
-    for(auto i: mentors){
-        if(cntbrs_assigned.find(i) != cntbrs_assigned.end())
+    for(auto i: cntbrs_assigned){
+        if(crs[i].cr_details[role] > level){
             return true;
+        }
     }
+    //vector<int> mentors = find_mentors(cntbr, level, role);
+    // for(auto i: mentors){
+    //     if(cntbrs_assigned.find(i) != cntbrs_assigned.end()){
+    //         cout << crs[i].cr_name_skill.first << "\n";
+    //         return true;
+    //     }
+    // }
     return false;
     
 }
@@ -56,6 +60,9 @@ int giveContrubutor(string role, int level){
     return -1;
 }
 
+bool mycmp(struct projects &a, struct projects &b){
+    return a.best_before < b.best_before;
+}
 int main(){
     ios_base::sync_with_stdio(0);
 	cin.tie(0);
@@ -90,7 +97,7 @@ int main(){
             pro[i].ord[skl] = j;
         }   
     }
-    
+    sort(pro, pro + prjts, mycmp);
     vector<pair<int, vector<int>>> ans(prjts);
     int tot = 0;
     int skills_covered = 0;
@@ -109,10 +116,12 @@ int main(){
         }
         if(skills_covered == pro[i].total_roles){
             tot++;
+
         }
         else{
             ans[tot].second.clear();
         }
+        cntbrs_assigned.clear();
     }
     cout << tot << "\n";
     for(int i = 0; i < tot; i++){
